@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import User
+from .models import User, Profile
+from to_do.models import Todo
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 class UserModelAdmin(BaseUserAdmin):
@@ -27,5 +28,21 @@ class UserModelAdmin(BaseUserAdmin):
     filter_horizontal = []
 
 
+class ProfileAdmin(admin.ModelAdmin):
+    # list_editable = ['verified']
+    list_display = ['id','user', 'full_name' ,'verified']
+    search_fields = ["user"]
+    ordering = ["user", "id"]
+
+
+class TodoAdmin(admin.ModelAdmin):
+    # list_editable = ['verified']
+    list_display = ['id','user', 'title', 'date','completed']
+    search_fields = ["user"]
+    ordering = ["user", "id"]
+
+
 # Now register the new UserAdmin...
 admin.site.register(User, UserModelAdmin)
+admin.site.register(Profile, ProfileAdmin)
+admin.site.register(Todo, TodoAdmin)

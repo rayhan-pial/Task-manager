@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class UserManager(BaseUserManager):
     def create_user(self, email, name, password=None, password2=None):
@@ -69,3 +71,25 @@ class User(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=1000)
+    bio = models.CharField(max_length=100)
+    image = models.ImageField(upload_to="user_images", default="default.jpg")
+    verified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.full_name
+
+
+@receiver(post_save, sender=User)
+def create_profile(sender, instance, created, **kwargs):
+    """
+    Signal receiver function to create a Profile instance when a User is created.
+    """
+    if created:
+        Profile.objects.create(user=instance)
+
+# Connect the signal receiver
+post_save.connect(create_profile, sender=User)
